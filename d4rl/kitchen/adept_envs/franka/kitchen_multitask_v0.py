@@ -110,7 +110,7 @@ class KitchenV0(robot_env.RobotEnv):
             'obs_dict': self.obs_dict,
             'rewards': reward_dict,
             'score': score,
-            'images': np.asarray(self.render(mode='rgb_array'))
+            # 'images': np.asarray(self.render(mode='rgb_array'))
         }
         # self.render()
         return obs, reward_dict['r_total'], done, env_info
@@ -188,11 +188,26 @@ class KitchenTaskRelaxV1(KitchenV0):
         score = 0.
         return reward_dict, score
 
-    def render(self, mode='human'):
+    def render(self, mode="human", height=None, width=None, camera_name=None, **kwargs):
         if mode =='rgb_array':
-            camera = engine.MovableCamera(self.sim, 1920, 2560)
-            camera.set_pose(distance=2.2, lookat=[-0.2, .5, 2.], azimuth=70, elevation=-35)
-            img = camera.render()
+            # camera = engine.MovableCamera(self.sim, height=height, width=width)
+            # camera.set_pose(distance=2.2, lookat=[-0.2, .5, 2.], azimuth=70, elevation=-35)
+            # img = camera.render()
+            # return img
+
+            if self.sim._render_context_offscreen is None:
+                from mujoco_py import MjRenderContextOffscreen
+                render_device = os.environ.get("CUDA_VISIBLE_DEVICES") if os.environ.get("CUDA_VISIBLE_DEVICES") is not None else -1
+                render_context = MjRenderContextOffscreen(self.sim, device_id=render_device)
+                render_context.cam.lookat[0] = -0.2
+                render_context.cam.lookat[1] = .5
+                render_context.cam.lookat[2] = 2.
+                render_context.cam.distance = 2.2
+                render_context.cam.azimuth = 70
+                render_context.cam.elevation = -35
+                self.sim.add_render_context(render_context)
+
+            img = self.sim.render(height, width)[::-1]
             return img
         else:
             super(KitchenTaskRelaxV1, self).render()
