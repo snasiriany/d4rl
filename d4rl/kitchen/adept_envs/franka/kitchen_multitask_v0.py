@@ -198,7 +198,7 @@ class KitchenTaskRelaxV1(KitchenV0):
             if self.sim._render_context_offscreen is None:
                 from mujoco_py import MjRenderContextOffscreen
                 render_device = os.environ.get("CUDA_VISIBLE_DEVICES") if os.environ.get("CUDA_VISIBLE_DEVICES") is not None else -1
-                render_context = MjRenderContextOffscreen(self.sim, device_id=render_device)
+                render_context = MjRenderContextOffscreen(self.sim, device_id=int(render_device))
                 render_context.cam.lookat[0] = -0.2
                 render_context.cam.lookat[1] = .5
                 render_context.cam.lookat[2] = 2.
