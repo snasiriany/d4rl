@@ -9,14 +9,18 @@ import pickle
 
 np.set_printoptions(precision=2, suppress=True)
 
-SAVE_DIRECTORY = '~/.offline_rl/datasets'
-DEMOS_DIRECTORY = '~/relay-policy-learning/kitchen_demos_multitask'
+SAVE_DIRECTORY = '/home/soroushn/tmp/d4rl-kitchen-datasets'
+DEMOS_DIRECTORY = '/home/soroushn/research/misc/kitchen_demos_multitask'
 DEMOS_SUBDIR_PATTERN = '*'
-ENVIRONMENTS = ['kitchen_microwave_kettle_light_slider-v0',
-                'kitchen_microwave_kettle_bottomburner_light-v0']
-# Uncomment lines below for "mini_kitchen_microwave_kettle_light_slider-v0'".
-DEMOS_SUBDIR_PATTERN = '*microwave_kettle_switch_slide'
-ENVIRONMENTS = ['mini_kitchen_microwave_kettle_light_slider-v0']
+# ENVIRONMENTS = ['kitchen_microwave_kettle_light_slider-v0',
+#                 'kitchen_microwave_kettle_bottomburner_light-v0']
+ENVIRONMENTS = [
+    'kitchen-partial-v0',
+    # 'kitchen-mixed-v0',
+]
+# # Uncomment lines below for "mini_kitchen_microwave_kettle_light_slider-v0'".
+# DEMOS_SUBDIR_PATTERN = '*microwave_kettle_switch_slide'
+# ENVIRONMENTS = ['mini_kitchen_microwave_kettle_light_slider-v0']
 
 OBS_ELEMENT_INDICES = [
     [11, 12],  # Bottom burners.

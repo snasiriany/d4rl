@@ -39,14 +39,13 @@ def viewer(env,
         env.mj_render()
 
     elif render == 'offscreen':
-
         global render_buffer
         if mode == 'initialize':
             render_buffer = []
             mode = 'render'
 
         if mode == 'render':
-            curr_frame = env.render(mode='rgb_array')
+            curr_frame = env.render(mode='rgb_array', height=512, width=512)
             render_buffer.append(curr_frame)
 
         if mode == 'save':
