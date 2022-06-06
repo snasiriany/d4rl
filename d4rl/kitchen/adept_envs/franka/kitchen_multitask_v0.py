@@ -21,6 +21,7 @@ from d4rl.kitchen.adept_envs import robot_env
 from d4rl.kitchen.adept_envs.utils.configurable import configurable
 from gym import spaces
 from dm_control.mujoco import engine
+from mujoco_py.generated import const
 
 @configurable(pickleable=True)
 class KitchenV0(robot_env.RobotEnv):
@@ -207,7 +208,12 @@ class KitchenTaskRelaxV1(KitchenV0):
                 render_context.cam.elevation = -35
                 self.sim.add_render_context(render_context)
 
-            img = self.sim.render(height, width)[::-1]
+            if camera_name == 'agentview':
+                camera_name = None
+                render_context = self.sim._render_context_offscreen
+                render_context.cam.type = const.CAMERA_FREE
+
+            img = self.sim.render(height, width, camera_name=camera_name)[::-1]
             return img
         else:
             super(KitchenTaskRelaxV1, self).render()

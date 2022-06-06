@@ -91,6 +91,8 @@
                                         <geom size="0.0110" fromto=".009 -.015 .035   -.009 -.012 .035" type="capsule" />
 
                                         <geom size="0.0185 0.0120 0.0175" pos="0 -.014 0.015" type="box" euler='-.03 0 0' />
+
+                                        <camera mode="fixed" name="eye_in_hand" pos="0.10 0 -0.10" quat="0 0.707108 0.707108 0" fovy="75"/>
                                     </body>
                                 </body>
                             </body>

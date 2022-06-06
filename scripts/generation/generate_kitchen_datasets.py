@@ -9,18 +9,14 @@ import pickle
 
 np.set_printoptions(precision=2, suppress=True)
 
-SAVE_DIRECTORY = '/home/soroushn/tmp/d4rl-kitchen-datasets'
-DEMOS_DIRECTORY = '/home/soroushn/research/misc/kitchen_demos_multitask'
-DEMOS_SUBDIR_PATTERN = '*'
+SAVE_DIRECTORY = '/home/soroushn/tmp'
+DEMOS_DIRECTORY = '/home/soroushn/research/mtil/datasets/d4rl/franka_kitchen'
+# DEMOS_SUBDIR_PATTERN = '*'
 # ENVIRONMENTS = ['kitchen_microwave_kettle_light_slider-v0',
 #                 'kitchen_microwave_kettle_bottomburner_light-v0']
-ENVIRONMENTS = [
-    'kitchen-partial-v0',
-    # 'kitchen-mixed-v0',
-]
-# # Uncomment lines below for "mini_kitchen_microwave_kettle_light_slider-v0'".
-# DEMOS_SUBDIR_PATTERN = '*microwave_kettle_switch_slide'
-# ENVIRONMENTS = ['mini_kitchen_microwave_kettle_light_slider-v0']
+# Uncomment lines below for "mini_kitchen_microwave_kettle_light_slider-v0'".
+DEMOS_SUBDIR_PATTERN = '*microwave_kettle_switch_slide'
+ENVIRONMENTS = ['kitchen-complete-v0']
 
 OBS_ELEMENT_INDICES = [
     [11, 12],  # Bottom burners.
@@ -75,6 +71,7 @@ def main():
     for env_name in ENVIRONMENTS:
         env = gym.make(env_name).unwrapped
         env.REMOVE_TASKS_WHEN_COMPLETE = False  # This enables a Markovian reward.
+        all_states = []
         all_obs = []
         all_actions = []
         all_rewards = []
@@ -83,6 +80,7 @@ def main():
         print('Relabelling data for %s.' % env_name)
         for demo_subdir, demos in all_demos.items():
             print('On demo from %s.' % demo_subdir)
+            demos_states = []
             demos_obs = []
             demos_actions = []
             demos_rewards = []
@@ -99,12 +97,14 @@ def main():
                     rewards.append(reward_dict['r_total'])
                 terminate_at = len(rewards)
                 rewards = rewards[:terminate_at]
+                demos_states.append(demo['states'][:terminate_at])
                 demos_obs.append(relabelled_obs[:terminate_at])
                 demos_actions.append(demo['actions'][:terminate_at])
                 demos_rewards.append(np.array(rewards))
                 demos_terminals.append(np.arange(len(rewards)) >= len(rewards) - 1)
                 demos_infos.append([idx] * len(rewards))
 
+            all_states.append(np.concatenate(demos_states))
             all_obs.append(np.concatenate(demos_obs))
             all_actions.append(np.concatenate(demos_actions))
             all_rewards.append(np.concatenate(demos_rewards))
@@ -116,6 +116,7 @@ def main():
             print('Avg episode rewards %f.' % np.mean(episode_rewards))
             print('Avg last step rewards %f.' % np.mean(last_rewards))
 
+        dataset_states = np.concatenate(all_states).astype('float32')
         dataset_obs = np.concatenate(all_obs).astype('float32')
         dataset_actions = np.concatenate(all_actions).astype('float32')
         dataset_rewards = np.concatenate(all_rewards).astype('float32')
@@ -128,12 +129,13 @@ def main():
         assert dataset_size == len(dataset_infos)
 
         dataset = {
+            'states': dataset_states,
             'observations': dataset_obs,
             'actions': dataset_actions,
             'rewards': dataset_rewards,
             'terminals': dataset_terminals,
             'infos': dataset_infos,
-            }
+        }
 
         print('Generated dataset with %d total steps.' % dataset_size)
         save_filename = os.path.join(SAVE_DIRECTORY, '%s.hdf5' % env_name)

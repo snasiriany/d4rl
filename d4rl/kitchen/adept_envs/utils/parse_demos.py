@@ -87,6 +87,8 @@ def gather_training_data(env, data, filename='demo_playback.mp4', render=None):
         (FPS * env.sim.model.opt.timestep * env.frame_skip)))
     t0 = timer.time()
 
+    states = []
+
     # initialize
     env.reset()
     init_qpos = data['qpos'][0].copy()
@@ -110,6 +112,8 @@ def gather_training_data(env, data, filename='demo_playback.mp4', render=None):
         #     env.sim.data.qpos[:] = qp
         #     env.sim.data.qvel[:] = qv
         #     env.sim.forward()
+
+        states.append(env.sim.get_state().flatten())
 
         obs = env._get_obs()
 
@@ -138,8 +142,10 @@ def gather_training_data(env, data, filename='demo_playback.mp4', render=None):
     t1 = timer.time()
     print("time taken = %f" % (t1 - t0))
 
+    states = np.stack(states)
+
     # note that <init_qpos, init_qvel> are one step away from <path_obs[0], path_act[0]>
-    return path_obs, path_act, init_qpos, init_qvel
+    return path_obs, path_act, init_qpos, init_qvel, states
 
 
 # MAIN =========================================================
@@ -197,7 +203,7 @@ def main(env, demo_dir, skip, graph, save_logs, view, render):
         # playback logs and gather data
         elif view == 'playback':
             try:
-                obs, act,init_qpos, init_qvel = gather_training_data(gym_env, data,\
+                obs, act,init_qpos, init_qvel, states = gather_training_data(gym_env, data,\
                 filename=data['logName'][:-4]+'_playback.mp4', render=render)
             except Exception as e:
                 print(e)
@@ -207,7 +213,8 @@ def main(env, demo_dir, skip, graph, save_logs, view, render):
                 'actions': act,
                 'goals': obs,
                 'init_qpos': init_qpos,
-                'init_qvel': init_qvel
+                'init_qvel': init_qvel,
+                'states': states,
             }
             paths.append(path)
             # accept = input('accept demo?')
