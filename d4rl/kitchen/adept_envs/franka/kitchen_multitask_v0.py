@@ -208,7 +208,7 @@ class KitchenTaskRelaxV1(KitchenV0):
                 render_context.cam.elevation = -35
                 self.sim.add_render_context(render_context)
 
-            if camera_name == 'agentview':
+            if (camera_name is None) or (camera_name == 'agentview'):
                 camera_name = None
                 render_context = self.sim._render_context_offscreen
                 render_context.cam.type = const.CAMERA_FREE
