@@ -24,6 +24,7 @@ import d4rl.kitchen.adept_envs
 import time as timer
 import skvideo.io
 import gym
+import os
 
 # headless renderer
 render_buffer = []  # rendering buffer
@@ -133,7 +134,7 @@ def gather_training_data(env, data, filename='demo_playback.mp4', render=None):
         # render when needed to maintain FPS
         if i_frame % render_skip == 0:
             viewer(env, mode='render', render=render)
-            print(i_frame, end=', ', flush=True)
+            # print(i_frame, end=', ', flush=True)
 
     # finalize
     if render:
@@ -174,12 +175,19 @@ def main(env, demo_dir, skip, graph, save_logs, view, render):
     gym_env = gym.make(env)
     paths = []
     print("Scanning demo_dir: " + demo_dir + "=========")
-    for ind, file in enumerate(glob.glob(demo_dir + "*.mjl")):
+    num_demos_skipped = 0
+    for ind, file in enumerate(glob.glob(demo_dir + "/**/*.mjl", recursive=True)):
 
         # process logs
         print("processing: " + file, end=': ')
 
-        data = parse_mjl_logs(file, skip)
+        try:
+            data = parse_mjl_logs(file, skip)
+        except:
+            print("Error processing {} !".format(file))
+            print("Skipping...\n")
+            num_demos_skipped += 1
+            continue
 
         print("log duration %0.2f" % (data['time'][-1] - data['time'][0]))
 
@@ -220,8 +228,10 @@ def main(env, demo_dir, skip, graph, save_logs, view, render):
             # accept = input('accept demo?')
             # if accept == 'n':
             #     continue
-            pickle.dump(path, open(demo_dir + env + str(ind) + "_path.pkl", 'wb'))
-            print(demo_dir + env + file + "_path.pkl")
+            pkl_path = os.path.join(os.path.dirname(file), env + str(ind) + "_path.pkl")
+            pickle.dump(path, open(pkl_path, 'wb'))
+
+    print("Num demos skipped:", num_demos_skipped)
 
 if __name__ == '__main__':
     main()
