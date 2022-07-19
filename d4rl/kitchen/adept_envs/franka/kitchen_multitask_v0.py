@@ -20,7 +20,7 @@ import numpy as np
 from d4rl.kitchen.adept_envs import robot_env
 from d4rl.kitchen.adept_envs.utils.configurable import configurable
 from gym import spaces
-from dm_control.mujoco import engine
+# from dm_control.mujoco import engine
 from mujoco_py.generated import const
 
 @configurable(pickleable=True)
